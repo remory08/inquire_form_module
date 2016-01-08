@@ -1,0 +1,33 @@
+<?php
+function inquire_form_schema() {
+ $schema['inquire_contacts'] = array(
+   'description' => t("The table for inquire form entries"),
+   'fields' => array(
+     'nid' => array(
+       'description' => 'The primary identifier for an inquire contact.',
+       'type' => 'serial',
+       'unsigned' => TRUE,
+       'not null' => TRUE),
+     'email' => array(
+       'description' => 'The email for inquire contact',
+       'type' => 'varchar',
+       'length' => 99,
+       'not null' => TRUE),
+     'interests' => array(
+       'description' => 'The interests submitted by inquire contact',
+       'type' => 'varchar',
+       'length' => 32,
+       'not null' => TRUE,
+     ),
+   'indexes' => array(
+     'node_changed'        => array('changed'),
+     'node_created'        => array('created'),
+     ),
+   'unique keys' => array(
+     'nid_vid' => array('nid', 'vid'),
+     'vid'     => array('vid')
+     ),
+   'primary key' => array('nid'),
+   );
+}   
+?>

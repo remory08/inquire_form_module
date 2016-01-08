@@ -1,0 +1,5 @@
+name = Inquire Form
+description = This module will serve as a form for general inquiries
+core = 7.x
+
+configure= admin/config/content/inquire-form

@@ -1,0 +1,122 @@
+<?php
+/**
+* Implements hook_help().
+*
+*Displays help and module information
+*
+* @param path
+* Which path of the site we're using to display help
+* @param arg
+* Array that holds the current path as returned from arg() function
+*/
+function inquire_form_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#inquire_form":
+      return '<p>' . t("Simple inquire form for general inquiries") . '</p>';
+      break;
+  }
+}
+/**
+* Implements hook_block_info()
+*/
+function inquire_form_block_info() {
+  $blocks['inquire_form'] = array(
+    'info' => t('inquire Form'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  return $blocks;
+}
+
+function inquire_form_form($node, &$form_state) {
+  $form['email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email'),
+    '#default_value' => '',
+    '#size' => 55,
+    '#maxlength' => 55,
+  );
+
+  $form['interested_in'] = array(
+    '#type' => 'select',
+    '#title' => t('What are you interested in?'),
+    '#default_value' => '',
+    '#options' => _inquire_form_interest_options(),
+    '#description' => t('Please select an option'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Send',
+    '#submit' => array('inquire_form_submit'),
+  );
+  $form['#validate'] = array('inquire_form_validate');
+  return $form;
+}
+
+function inquire_form_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'inquire_form':
+      $block['subject'] = t('inquire Us');
+      $block['content'] = drupal_get_form('inquire_form_form');
+      break;
+  }
+  return $block;
+}
+
+function inquire_form_validate($form, &$form_state) {
+  $mail = $form_state['values']['email'];
+  if (!valid_email_address($mail)) {
+    form_set_error('email', t('The email address appears to be invalid'));
+  }
+}
+
+function inquire_form_submit($form, &$form_state) {
+  $msg = t('Thanks for your interest in @int', array('@int' => $form_state['values']['interested_in']));
+  drupal_set_message($msg);
+  $form_state['redirect'] = 'node/1'; //get this to be dynamic
+}
+
+/**
+ * Helper for getting/settings options for the form.
+ */
+function _inquire_form_interest_options() {
+  $options =& drupal_static(__FUNCTION__, array());
+  if(!empty($options)) {
+     return $options;
+  }
+  else {
+    $options = array(
+      1 => t('Vacation Rentals'),
+      2 => t('Real Estate'),
+      3 => t('General Information'),
+      4 => t('Other'),
+    );
+    drupal_alter('inquire_form_interests', $options);
+    return $options;
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+ function inquire_form_menu() {
+   $items = array();
+   $items['admin/config/content/inquire-form'] = array(
+    //  'type' => MENU_LOCAL_TASK,
+     'title' => t('Configure inquire Form'),
+     'description' => t('Configure options for the inquire form.'),
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('inquire_form_admin_form'),
+     'file' => 'inquire_form.admin.inc',
+    //  'access callback' => TRUE,
+     'access arguments' => array('administer nodes'),
+   );
+   $items['unique_node_autocomplete_callback'] = array(
+     'page callback' => 'inquire_form_unique_node_autocomplete_callback',
+     'file' => 'inquire_form.admin.inc',
+     'type' => MENU_CALLBACK,
+     'access arguments' => array('access content'),
+   );
+   return $items;
+ }
