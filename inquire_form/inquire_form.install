@@ -28,6 +28,6 @@ function inquire_form_schema() {
      'vid'     => array('vid')
      ),
    'primary key' => array('nid'),
-   );
-}   
-?>
+   )
+ );
+}
